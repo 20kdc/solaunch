@@ -1,0 +1,28 @@
+#!/bin/sh
+
+cd bin
+
+zig cc -Os -target x86-windows-gnu ../windows.c -o run.wx32.exe
+zig cc -Os -target x86_64-windows-gnu ../windows.c -o run.wx64.exe
+zig cc -Os -target aarch64-windows-gnu ../windows.c -o run.wa64.exe
+
+zig cc -Os -DTRICKERY -target x86-linux-gnu ../unix.c -o run.lgx32
+zig cc -Os -DTRICKERY -target x86_64-linux-gnu ../unix.c -o run.lgx64
+zig cc -Os -DTRICKERY -target aarch64-linux-gnu ../unix.c -o run.lga64
+zig cc -Os -DTRICKERY -target riscv64-linux-gnu ../unix.c -o run.lgr64
+
+zig cc -Os -DMAC -target x86_64-macos ../unix.c -o run.mx64
+zig cc -Os -DMAC -target aarch64-macos ../unix.c -o run.ma64
+
+# program
+zig cc -shared -s -target x86-windows-gnu ../example.c -o run.wx32.dll
+zig cc -shared -s -target x86_64-windows-gnu ../example.c -o run.wx64.dll
+zig cc -shared -s -target aarch64-windows-gnu ../example.c -o run.wa64.dll
+
+zig cc -Os -shared -target x86-linux-gnu ../example.c -o run.lgx32.so
+zig cc -Os -shared -target x86_64-linux-gnu ../example.c -o run.lgx64.so
+zig cc -Os -shared -target aarch64-linux-gnu ../example.c -o run.lga64.so
+zig cc -Os -shared -target riscv64-linux-gnu ../example.c -o run.lgr64.so
+
+zig cc -Os -DMAC -shared -target x86_64-macos ../example.c -o run.mx64.dylib
+zig cc -Os -DMAC -shared -target aarch64-macos ../example.c -o run.ma64.dylib

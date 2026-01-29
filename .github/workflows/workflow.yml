@@ -1,0 +1,18 @@
+name: manual
+on:
+    push:
+        branches:
+          - 'main'
+
+jobs:
+    compile:
+        name: compile
+        runs-on: docker
+        steps:
+          - uses: actions/checkout@v3
+          - uses: https://codeberg.org/mlugg/setup-zig@v2
+          - run: "./build"
+          - uses: actions/upload-artifact@v3
+            with:
+                name: bin
+                path: bin

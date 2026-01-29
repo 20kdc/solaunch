@@ -1,0 +1,95 @@
+/*
+ * solaunch
+ *
+ * This is free and unencumbered software released into the public domain.
+ *
+ * Anyone is free to copy, modify, publish, use, compile, sell, or
+ * distribute this software, either in source code form or as a compiled
+ * binary, for any purpose, commercial or non-commercial, and by any
+ * means.
+ *
+ * In jurisdictions that recognize copyright laws, the author or authors
+ * of this software dedicate any and all copyright interest in the
+ * software to the public domain. We make this dedication for the benefit
+ * of the public at large and to the detriment of our heirs and
+ * successors. We intend this dedication to be an overt act of
+ * relinquishment in perpetuity of all present and future rights to this
+ * software under copyright law.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information, please refer to <https://unlicense.org/>
+ */
+
+#include <limits.h>
+#include <stddef.h>
+
+#ifndef TRICKERY
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <dlfcn.h>
+#else
+typedef struct _IO_FILE FILE;
+extern FILE * stderr;
+int fprintf(FILE *, const char *, ...);
+char * realpath(const char *, char *);
+void * memset(void *, int, size_t);
+size_t strlen(const char *);
+void exit(int);
+void * realloc(void *, size_t);
+void free(void *);
+void * dlopen(const char *, int);
+void * dlsym(void *, const char *);
+char * strcat(char *, const char *);
+#define RTLD_NOW 2
+#endif
+
+#ifdef MAC
+static const char suffix[] = ".dylib";
+#else
+static const char suffix[] = ".so";
+#endif
+static const char symbol[] = "main";
+
+#define BRAND "solaunch"
+
+static void * find_and_load_library(const char * whatami) {
+	char * tmppath, * tmppath2;
+	void * lib;
+	tmppath = realpath("/proc/self/exe", NULL);
+	if (!tmppath) {
+		fprintf(stderr, "%s: " BRAND ": unable to find self\n", whatami);
+		exit(1);
+	}
+	tmppath2 = realloc(tmppath, strlen(tmppath) + strlen(suffix) + 1);
+	if (!tmppath2) {
+		free(tmppath);
+		fprintf(stderr, "%s: " BRAND ": unable to ensure room for extra characters\n", whatami);
+		exit(1);
+	}
+	strcat(tmppath2, suffix);
+	lib = dlopen(tmppath2, RTLD_NOW);
+	if (!lib) {
+		fprintf(stderr, "%s: " BRAND ": unable to open library: %s\n", whatami, tmppath2);
+		exit(1);
+	}
+	lib = dlsym(lib, symbol);
+	if (!lib) {
+		fprintf(stderr, "%s: " BRAND ": no '%s' symbol in library: %s\n", whatami, symbol, tmppath2);
+		exit(1);
+	}
+	free(tmppath2);
+	return lib;
+}
+
+int main(int argc, char ** argv) {
+	return ((int (*)(int, char **)) find_and_load_library(argc ? argv[0] : "?"))(argc, argv);
+}
