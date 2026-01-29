@@ -2,9 +2,18 @@
 
 cd bin
 
+zig cc -Os ../exe2gui.c -o exe2gui
+
 zig cc -Os -target x86-windows-gnu ../windows.c -o run.wx32.exe
 zig cc -Os -target x86_64-windows-gnu ../windows.c -o run.wx64.exe
 zig cc -Os -target aarch64-windows-gnu ../windows.c -o run.wa64.exe
+cp run.wx32.exe runw.wx32.exe
+cp run.wx64.exe runw.wx64.exe
+cp run.wa64.exe runw.wa64.exe
+./exe2gui runw.wx32.exe
+./exe2gui runw.wx64.exe
+./exe2gui runw.wa64.exe
+rm exe2gui
 
 zig cc -Os -DTRICKERY -target x86-linux-gnu ../unix.c -o run.lgx32
 zig cc -Os -DTRICKERY -target x86_64-linux-gnu ../unix.c -o run.lgx64
