@@ -49,24 +49,49 @@ void free(void *);
 void * dlopen(const char *, int);
 void * dlsym(void *, const char *);
 char * strcat(char *, const char *);
+char * strdup(const char *);
 #define RTLD_NOW 2
 #endif
 
+#define BRAND "solaunch"
+
 #ifdef MAC
+#include <mach-o/dyld.h>
 static const char suffix[] = ".dylib";
+static char * executable_path(const char * whatami) {
+	uint32_t bufsize = 0;
+	_NSGetExecutablePath(NULL, &bufsize);
+	char * res = malloc(bufsize);
+	if (!res) {
+		fprintf(stderr, "%s: " BRAND ": unable to allocate memory to find self\n", whatami);
+		exit(1);
+	}
+	if (_NSGetExecutablePath(res, &bufsize)) {
+		fprintf(stderr, "%s: " BRAND ": unable to find self (late-early)\n", whatami);
+		exit(1);
+	}
+	return res;
+}
 #else
 static const char suffix[] = ".so";
+static char * executable_path(const char * whatami) {
+	return strdup("/proc/self/exe");
+}
 #endif
 static const char symbol[] = "main";
 
-#define BRAND "solaunch"
-
 static void * find_and_load_library(const char * whatami) {
-	char * tmppath, * tmppath2;
+	char * initpath, * tmppath, * tmppath2;
 	void * lib;
+	initpath = executable_path(whatami);
+	if (!initpath) {
+		fprintf(stderr, "%s: " BRAND ": unable to find self (early)\n", whatami);
+		exit(1);
+	}
 	tmppath = realpath("/proc/self/exe", NULL);
+	free(initpath);
 	if (!tmppath) {
-		fprintf(stderr, "%s: " BRAND ": unable to find self\n", whatami);
+		fprintf(stderr, "%s: " BRAND ": unable to find self (late)\n", whatami);
 		exit(1);
 	}
 	tmppath2 = realloc(tmppath, strlen(tmppath) + strlen(suffix) + 1);
