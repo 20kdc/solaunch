@@ -1,4 +1,4 @@
-# 'solaunch' : stub 'run this .so file' program built for various targets
+# 'solaunch' : stub 'run this .so/.dll/.dylib file' program built for various targets
 
 Basically, it's annoying to try and build large projects as static monoliths for... well, all the reasons.
 

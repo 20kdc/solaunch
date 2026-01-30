@@ -23,6 +23,6 @@ jobs:
                 name: Release ${{ github.ref_name }}
                 draft: true
                 prerelease: true
-                files: bin/*
+                files: solaunch.zip
             env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

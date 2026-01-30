@@ -11,5 +11,5 @@ jobs:
           - run: "./build"
           - uses: actions/upload-artifact@v6
             with:
-                name: bin
-                path: bin
+                name: solaunch.zip
+                path: solaunch.zip

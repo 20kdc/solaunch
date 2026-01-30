@@ -4,6 +4,8 @@ set -e
 
 cd bin
 
+rm -f run*
+
 zig cc -Os ../exe2gui.c -o exe2gui
 
 zig cc -Os -target x86-windows-gnu ../windows.c -o run.wx32.exe
@@ -53,3 +55,9 @@ zig cc -Os -shared -target riscv64-linux-gnu ../example.c -o run.lgr64.so
 
 zig cc -Os -DMAC -shared -target x86_64-macos ../example.c -o run.mx64.dylib
 zig cc -Os -DMAC -shared -target aarch64-macos ../example.c -o run.ma64.dylib
+
+# clean up
+cd ..
+
+rm -f solaunch.zip
+zip -r solaunch.zip bin
