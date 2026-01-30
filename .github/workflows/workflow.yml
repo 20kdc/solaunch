@@ -12,7 +12,7 @@ jobs:
           - uses: actions/checkout@v3
           - uses: mlugg/setup-zig@v2
           - run: "./build"
-          - uses: actions/upload-artifact@v3
+          - uses: actions/upload-artifact@v6
             with:
                 name: bin
                 path: bin
