@@ -63,4 +63,4 @@ zig cc -Os -DMAC -shared -target aarch64-macos ../example.c -o run.ma64.dylib
 cd ..
 
 rm -f solaunch.zip
-zip -q -r solaunch.zip bin
+zip -q -r solaunch.zip bin COPYING README.md *.c

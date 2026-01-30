@@ -17,6 +17,8 @@ jobs:
               platform: x64
               cc: 0
           - uses: mlugg/setup-zig@v2
+            with:
+              version: "0.15.2"
           - run: "./build"
           - uses: actions/upload-artifact@v6
             with:
