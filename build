@@ -6,16 +6,19 @@ cd bin
 
 rm -f run*
 
-zig cc -Os ../exe2gui.c -o exe2gui
+# egor-tensin/setup-mingw does what we want it to do, but sets -posix without asking.
+# We don't want that, so be explicit.
+W32GCC=i686-w64-mingw32-gcc-win32
+W64GCC=x86_64-w64-mingw32-gcc-win32
 
-zig cc -Os -target x86-windows-gnu ../windows.c -o run.wx32.exe
-zig cc -Os -target x86_64-windows-gnu ../windows.c -o run.wx64.exe
+$W32GCC -s -Os ../windows.c -o run.wx32.exe
+$W64GCC -s -Os ../windows.c -o run.wx64.exe
+$W32GCC -s -mwindows -Os ../windows.c -o runw.wx32.exe
+$W64GCC -s -mwindows -Os ../windows.c -o runw.wx64.exe
+
+zig cc -Os ../exe2gui.c -o exe2gui
 zig cc -Os -target aarch64-windows-gnu ../windows.c -o run.wa64.exe
-cp run.wx32.exe runw.wx32.exe
-cp run.wx64.exe runw.wx64.exe
 cp run.wa64.exe runw.wa64.exe
-./exe2gui runw.wx32.exe
-./exe2gui runw.wx64.exe
 ./exe2gui runw.wa64.exe
 rm -f exe2gui
 
@@ -44,8 +47,8 @@ zig cc -Os -DMAC -target x86_64-macos ../unix.c -o run.mx64
 zig cc -Os -DMAC -target aarch64-macos ../unix.c -o run.ma64
 
 # program
-zig cc -shared -s -target x86-windows-gnu ../example.c -o run.wx32.dll
-zig cc -shared -s -target x86_64-windows-gnu ../example.c -o run.wx64.dll
+$W32GCC -shared -s ../example.c -o run.wx32.dll
+$W64GCC -shared -s ../example.c -o run.wx64.dll
 zig cc -shared -s -target aarch64-windows-gnu ../example.c -o run.wa64.dll
 
 zig cc -Os -shared -target x86-linux-gnu ../example.c -o run.lgx32.so
@@ -60,4 +63,4 @@ zig cc -Os -DMAC -shared -target aarch64-macos ../example.c -o run.ma64.dylib
 cd ..
 
 rm -f solaunch.zip
-zip -r solaunch.zip bin
+zip -q -r solaunch.zip bin

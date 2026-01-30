@@ -7,6 +7,10 @@ jobs:
         runs-on: ubuntu-22.04
         steps:
           - uses: actions/checkout@v3
+          - uses: egor-tensin/setup-mingw@v3
+            with:
+              platform: x64
+              cc: 0
           - uses: mlugg/setup-zig@v2
           - run: "./build"
           - uses: actions/upload-artifact@v6
