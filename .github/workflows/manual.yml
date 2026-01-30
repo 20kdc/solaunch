@@ -1,8 +1,5 @@
-name: push-compile
-on:
-    push:
-        branches:
-          - 'main'
+name: manual
+on: workflow_dispatch
 
 jobs:
     compile:

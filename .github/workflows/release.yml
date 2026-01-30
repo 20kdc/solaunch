@@ -1,0 +1,28 @@
+name: release
+on:
+    push:
+        tags:
+            - 'v*'
+
+permissions:
+    contents: write
+
+jobs:
+    release:
+        runs-on: ubuntu-22.04
+        steps:
+          - uses: actions/checkout@v3
+          - uses: mlugg/setup-zig@v2
+          - run: "./build"
+          - uses: actions/upload-artifact@v6
+            with:
+                name: bin
+                path: bin
+          - uses: softprops/action-gh-release@v1
+            with:
+                name: Release ${{ github.ref_name }}
+                draft: true
+                prerelease: true
+                files: bin
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
