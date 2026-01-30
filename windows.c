@@ -40,6 +40,9 @@ static void stderr_write(const char * text) {
 	WriteFile(GetStdHandle(STD_ERROR_HANDLE), text, strlen(text), NULL, NULL);
 }
 
+int __getmainargs(int *, char ***, char ***, int);
+int __wgetmainargs(int *, wchar_t ***, wchar_t ***, int, int *);
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
 	/* We aren't allowed to know the real size of the buffer we need. Grr. */
 	wchar_t * text;
@@ -69,9 +72,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		stderr_write(BRAND ": Unable to find DLL.\n");
 		exit(1);
 	}
+	/* Try this first as it's the 'Windowsy' way. */
 	proc = GetProcAddress(lib, "WinMain@16");
 	if (proc)
 		return ((int WINAPI (*)(HINSTANCE, HINSTANCE, LPSTR, int)) proc)(hInstance, hPrevInstance, lpCmdLine, nShowCmd);
-	stderr_write(BRAND ": Unable to find WinMain@16.\n");
+	/* Try this second as it's internationalization-friendly. */
+	proc = GetProcAddress(lib, "wmain");
+	if (proc) {
+		int argc = 0;
+		wchar_t ** argv = NULL;
+		wchar_t ** env = NULL;
+		int nm = 0;
+		__wgetmainargs(&argc, &argv, &env, 0, &nm);
+		return ((int (*)(int, wchar_t *[], wchar_t *[])) proc)(argc, argv, env);
+	}
+	proc = GetProcAddress(lib, "main");
+	if (proc) {
+		int argc = 0;
+		char ** argv = NULL;
+		char ** env = NULL;
+		__getmainargs(&argc, &argv, &env, 0);
+		return ((int (*)(int, char *[], char *[])) proc)(__argc, __argv, _environ);
+	}
+	stderr_write(BRAND ": Unable to find WinMain@16, wmain, or main.\n");
 	exit(1);
 }

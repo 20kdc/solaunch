@@ -23,7 +23,8 @@ From the perspective of custom configure/build script design, this changes the e
 * The program gets its own filename.
 * On Unixes other than Mac, it then canonicalizes it fully and appends `.so`; on Mac it instead appends `.dylib`.
 * On Windows, the filename must be more than 3 characters; it replaces the last three with `dll` (the assumption is from `exe`, `com`, etc.).
-* The library is then loaded and the function `main` (most) or `WinMain@16` (Windows) is called appropriately.
+* The library is then loaded and the function `main` is called appropriately.
+	* On Windows, `WinMain@16` is tried first, followed by `wmain`, and then `main`.
 
 ## License
 

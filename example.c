@@ -28,16 +28,28 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 int main(int argc, char ** argv) {
-	puts("Hello, world!");
+	puts("Hello, world! Args are:");
+	for (int i = 0; i < argc; i++)
+		fprintf(stdout, "%i: %s [%i]\n", i, argv[i], (int) strlen(argv[i]));
 	return 0;
 }
 
 #ifdef _WIN32
+/*
 #include <windows.h>
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
 	puts("Hello, world!");
+	return 0;
+}
+*/
+int wmain(int argc, wchar_t ** argv) {
+	puts("Hello, unicode world! Args are:");
+	for (int i = 0; i < argc; i++) {
+		fwprintf(stdout, L"%i: %S [%i]\n", i, argv[i], (int) wcslen(argv[i]));
+	}
 	return 0;
 }
 #endif
