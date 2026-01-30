@@ -24,3 +24,16 @@ From the perspective of custom configure/build script design, this changes the e
 * On Unixes other than Mac, it then canonicalizes it fully and appends `.so`; on Mac it instead appends `.dylib`.
 * On Windows, the filename must be more than 3 characters; it replaces the last three with `dll` (the assumption is from `exe`, `com`, etc.).
 * The library is then loaded and the function `main` (most) or `WinMain@16` (Windows) is called appropriately.
+
+## License
+
+Everything's public-domain/Unlicense (see `COPYING`).
+
+The hopefully minimal Windows CRT code comes from MinGW; everything else should be reasonably 'pure' unless code's being embedded that I'm not aware of.
+
+## Status
+
+* Not tested at all on Mac
+* Wine check seems happy, but should do the Windows XP test sometime
+* `readelf --dyn-syms run.lgx64 -W`
+* musl build support would be nice, but requires pulling in even more stuff.

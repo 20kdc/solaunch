@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 cd bin
 
 zig cc -Os ../exe2gui.c -o exe2gui
@@ -13,12 +15,28 @@ cp run.wa64.exe runw.wa64.exe
 ./exe2gui runw.wx32.exe
 ./exe2gui runw.wx64.exe
 ./exe2gui runw.wa64.exe
-rm exe2gui
+rm -f exe2gui
 
-zig cc -Os -DTRICKERY -target x86-linux-gnu ../unix.c -o run.lgx32
-zig cc -Os -DTRICKERY -target x86_64-linux-gnu ../unix.c -o run.lgx64
-zig cc -Os -DTRICKERY -target aarch64-linux-gnu ../unix.c -o run.lga64
-zig cc -Os -DTRICKERY -target riscv64-linux-gnu ../unix.c -o run.lgr64
+do_lin_build() {
+	set -e
+	zig cc -Os -DTRICKERY -target $1 ../unix.c -o $2
+	patchelf --clear-symbol-version __libc_start_main $2
+	patchelf --clear-symbol-version strlen $2
+	patchelf --clear-symbol-version strdup $2
+	patchelf --clear-symbol-version realloc $2
+	patchelf --clear-symbol-version dlopen $2
+	patchelf --clear-symbol-version dlsym $2
+	patchelf --clear-symbol-version free $2
+	patchelf --clear-symbol-version stderr $2
+	patchelf --clear-symbol-version fprintf $2
+	patchelf --clear-symbol-version exit $2
+	patchelf --clear-symbol-version abort $2
+}
+
+do_lin_build x86-linux-gnu run.lgx32
+do_lin_build x86_64-linux-gnu run.lgx64
+do_lin_build aarch64-linux-gnu run.lga64
+do_lin_build riscv64-linux-gnu run.lgr64
 
 zig cc -Os -DMAC -target x86_64-macos ../unix.c -o run.mx64
 zig cc -Os -DMAC -target aarch64-macos ../unix.c -o run.ma64

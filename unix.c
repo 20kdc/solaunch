@@ -40,7 +40,6 @@
 typedef struct _IO_FILE FILE;
 extern FILE * stderr;
 int fprintf(FILE *, const char *, ...);
-char * realpath(const char *, char *);
 void * memset(void *, int, size_t);
 size_t strlen(const char *);
 void exit(int);
@@ -88,12 +87,21 @@ static void * find_and_load_library(const char * whatami) {
 		fprintf(stderr, "%s: " BRAND ": unable to find self (early)\n", whatami);
 		exit(1);
 	}
-	tmppath = realpath("/proc/self/exe", NULL);
-	free(initpath);
+#ifndef TRICKERY
+	tmppath = realpath(initpath, NULL);
+#else
+	/*
+	 * This is to get glibc to actually do the right thing.
+	 * It returns NULL in the realpath call if you don't have the right symbol version.
+	 * What we really want is POSIX 2008 behaviour, but portable to very old Linux distros.
+	 */
+	tmppath = ((char * (*)(const char *, char *)) dlsym(NULL, "realpath"))(initpath, NULL);
+#endif
 	if (!tmppath) {
-		fprintf(stderr, "%s: " BRAND ": unable to find self (late)\n", whatami);
+		fprintf(stderr, "%s: " BRAND ": unable to find self from %s\n", whatami, initpath);
 		exit(1);
 	}
+	free(initpath);
 	tmppath2 = realloc(tmppath, strlen(tmppath) + strlen(suffix) + 1);
 	if (!tmppath2) {
 		free(tmppath);
