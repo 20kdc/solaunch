@@ -8,7 +8,7 @@ This is to say nothing of the build-time effects on larger projects.
 
 But building as a mixture of dynamic libraries and regular executables tends to also be messy, because it becomes a build matrix between 'compiler' and 'build type'.
 
-Therefore, this project provides a set of Actions-built (and thus verifiable) executables that can simply be treated as a pre-built third-party dependency.
+Therefore, this project provides a set of Actions-built (and thus hopefully verifiable) executables that can simply be treated as a pre-built third-party dependency.
 
 The actual application built using them can therefore be reduced to a process of building dynamic libraries based on source code and other dynamic libraries.
 
@@ -34,6 +34,7 @@ The hopefully minimal Windows CRT code comes from MinGW; everything else should 
 ## Status
 
 * Not tested at all on Mac
-* Wine check seems happy, but should do the Windows XP test sometime
+* Wine seems happy for 32-bit and 64-bit, XP VM seems happy for 32-bit (64-bit untested), ARM64 is handled as 'least-effort'
 * `readelf --dyn-syms run.lgx64 -W`
-* musl build support would be nice, but requires pulling in even more stuff.
+* musl build support would be nice, but might require pulling in even more stuff.
+	* _With how the mingw stuff seems to be working out, I am reasonably certain this can actually be done._
